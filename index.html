@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/sf-mono" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  
+  <div id="app">
+    
+
+    <div class="left">
+      <h1>Sudoku</h1>
+
+      <div class="start-container">
+        <button class="restart" @click="restartGame">RESTART</button>
+        <button class="new-game" @click="startNewGame">NEW GAME</button>
+      </div>
+
+      <div class="difficulty">
+        <span v-for="d in difficulties" 
+              :class="{ selected: currentDifficulty === d }"
+              @click="changeDifficulty(d)">
+          {{ d.toUpperCase() }}
+        </span>
+      </div>
+
+      <div class="function-container">
+        <button @click="getHint()">Get Hint</button>
+        <button @click="showSolution()">Show Full Solution</button>
+        <div class="forward">
+          Forward to Row <input type="number" v-model="forwardRow" min="1" max="9" @keydown.enter="forwardToCell" ref="forwardRowInput">
+          Column <input type="number" v-model="forwardColumn" min="1" max="9" @keydown.enter="forwardToCell" ref="forwardColumnInput">
+        </div>
+
+        <!-- <button @click="toggleNumberNote">Toggle Number Note</button> -->
+      </div>
+      <div class="shortcuts">
+        <h2>ShortCuts</h2>
+        <table border="1">
+          <tr>
+            <td>Forward to Cell</td>
+            <td>
+              <p>F</p>
+            </td>
+          </tr>
+          <tr>
+            <td>Toggle Number/Note Mode</td>
+            <td>
+              <p>N</p>
+            </td>
+          </tr>
+          <tr>
+            <td>Move to Edge</td>
+            <td>
+              <p>Cmd</p>
+              <p>Arrow</p>
+            </td>
+          </tr>
+          <tr>
+            <td>Enter Number or Note</td>
+            <td>
+              <p>Number</p>
+            </td>
+          </tr>
+          <tr>
+            <td>Undo Last Action</td>
+            <td>
+              <!-- <i class="fab fa-apple"></i> -->
+              <!-- <i class="fa-solid fa-terminal"></i> -->
+              <p>Cmd</p>
+              <p>Z</p>
+              <!-- Command/Ctrl Z -->
+            </td>
+          </tr>
+        </table>
+      </div>
+      
+    </div>
+
+    <div class="right">
+      
+
+      <div class="board" :class="{ 'transparent': gameSuccess }">
+        <div class="row" v-for="(row, rowIndex) in board" :key="rowIndex">
+          <div class="cell"
+               v-for="(cell, cellIndex) in row"
+               :key="cellIndex"
+               :class="[isCellHighlighted(cell, rowIndex, cellIndex)]"
+               @click="cellClicked(cell, rowIndex, cellIndex)">
+            <p :class="[cellColor(rowIndex, cellIndex)]">{{ cell || ' ' }}</p>
+            <div class="notes-container">
+              <div class="cell-note" v-for="n in 9" :key="n" 
+                  :class="{'note-active': isNoteActive(rowIndex, cellIndex, n), 'highlighted': isNoteHighlighted(n)}">
+                {{ n }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="game-success" v-if="gameSuccess">
+          <h2>Success!</h2>
+          <button @click="restartGame">RESTART</button>
+          <button @click="startNewGame">NEW GAME</button>
+        </div>
+      </div>
+
+      <div class="number">
+        <div class="number-item" v-for="num in 9" :key="num">
+          <div class="number-dots" v-html="getDots(num)"></div>
+          <div class="number-input" @click="numberClicked(num)" :class="{ 'input-number': inputNum }">{{ num }}</div>
+          <div class="number-note" @click="noteClicked(num)" :class="{ 'input-number-note': inputNote }">{{ num }}</div>
+        </div>
+      </div>
+      
+    </div>
+
+
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
